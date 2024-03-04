@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question</title>
+</head>
+<body>
+    <% if (question_data.length > 0) { %>
+        <% for (let i=0;i<question_data.length;i++) { %>
+            <a href="/question/<%= question_data[i].id %>"><%= question_data[i].question_text %></a>
+        <% } %>
+        <a href="/new-question/<%= quiz_id %>">Add question</a>
+    <% } else { %>
+        <p>No questions found</p>
+        <a href="/new-question/<%= quiz_id %>">Add question</a>
+    <% } %>
+</body>
+</html>

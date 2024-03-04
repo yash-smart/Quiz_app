@@ -73,6 +73,21 @@ app.post('/add_quiz/:id',async (req,res) => {
     res.redirect('/main/'+req.params.id)
 })
 
+app.get('/quiz/:id',async (req,res) => {
+    let quiz_questions = await db.query('select * from questions where quiz_id = $1',[req.params.id])
+    quiz_questions = quiz_questions.rows
+    res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id});
+})
+
+app.get('/new-question/:id',async (req,res) => {
+    res.render('new_question.ejs',{quiz_id: req.params.id})
+})
+
+app.post('/question_submit/:id',async (req,res) => {
+    await db.query('insert into questions(quiz_id,question_text,marks) values($1,$2,$3);',[req.params.id,req.body.question_text,req.body.marks]);
+    res.redirect('/quiz/'+req.params.id);
+})
+
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
