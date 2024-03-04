@@ -53,7 +53,7 @@ app.post('/ini',async (req,res) => {
 
 app.get('/main/:id',async (req,res) => {
     let quizzes_obj = await db.query('select * from quizzes where user_id = $1;',[req.params.id])
-    console.log(quizzes_obj.rows)
+    // console.log(quizzes_obj.rows)
     res.render('main.ejs',{data: quizzes_obj.rows,id: req.params.id})
 })
 
