@@ -39,9 +39,7 @@ app.post('/ini',async (req,res) => {
         let user_id = data_obj.rows[0].id;
         console.log(user_id)
         if (data === Password) {
-            let quizzes_obj = await db.query('select * from quizzes where user_id = $1;',[user_id])
-            console.log(quizzes_obj.rows)
-            res.render('main.ejs',{data: quizzes_obj.rows,id: user_id})
+            res.redirect('/main/'+user_id)
         }
         else {
             res.send('Login failed')
@@ -51,6 +49,12 @@ app.post('/ini',async (req,res) => {
         res.send('Login failed')
     }
     
+})
+
+app.get('/main/:id',async (req,res) => {
+    let quizzes_obj = await db.query('select * from quizzes where user_id = $1;',[req.params.id])
+    console.log(quizzes_obj.rows)
+    res.render('main.ejs',{data: quizzes_obj.rows,id: req.params.id})
 })
 
 app.post('/register',(req,res) => {
@@ -66,8 +70,7 @@ app.get('/add_quiz/:id',(req,res) => {
 
 app.post('/add_quiz/:id',async (req,res) => {
     await db.query('Insert into quizzes(user_id,quiz_name,status) values($1,$2,0);',[req.params.id,req.body.quiz_name]);
-    let quizzes_obj = await db.query('select * from quizzes where user_id = $1;',[req.params.id])
-    res.render('main.ejs',{data: quizzes_obj.rows,id: req.params.id})
+    res.redirect('/main/'+req.params.id)
 })
 
 app.listen(port, () => {

@@ -14,6 +14,7 @@
                 <a href="/quiz/<%= data[i].id %>"><%= data[i].quiz_name %> - Isn't Taking responses</a>
             <% } %>
         <% } %>
+        <a href="/add_quiz/<%= id %>">Create one?</a>
     <% } else {%>
         <h1>No quizzes found</h1>
         <a href="/add_quiz/<%= id %>">Create one?</a>
