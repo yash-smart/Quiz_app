@@ -88,6 +88,36 @@ app.post('/question_submit/:id',async (req,res) => {
     res.redirect('/quiz/'+req.params.id);
 })
 
+app.get('/question/:id',async (req,res) => {
+    let question = await db.query('select question_text,marks,correct_option from questions where id=$1',[req.params.id])
+    let option_data = await db.query('select * from options where question_id=$1',[req.params.id])
+    res.render('options.ejs',{question_data: question.rows[0],option_data:option_data.rows,question_id:req.params.id});
+})
+
+app.get('/add_option/:id',async (req,res)=> {
+    res.render('add_option.ejs',{quest_id:req.params.id})
+})
+
+app.post('/add_option/:id',async (req,res) => {
+    let option_number = await db.query('select max(option_number) as max from options where question_id=$1;',[req.params.id])
+    if (option_number.rows.length > 0) {
+        if (option_number.rows[0].max !== null) {
+            console.log(option_number.rows)
+            await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[option_number.rows[0].max+1,req.params.id,req.body.option_text]);
+        }
+        else {
+            console.log(1)
+            await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[1,req.params.id,req.body.option_text]);
+        }
+    }
+    else {
+        console.log(1)
+        await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[1,req.params.id,req.body.option_text]);
+    }
+    
+    res.redirect('/question/'+req.params.id)
+})
+
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question</title>
+</head>
+<body>
+    <h1><%= question_data.question_text %> - <%= question_data.marks %></h1>
+    <% for (let i=0;i<option_data.length;i++) { %>
+        <p><%= option_data[i].option_number %>: <%= option_data[i].option_text %></p>
+    <% } %>
+    <a href="/add_option/<%= question_id %>">Add option</a>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add option</title>
+</head>
+<body>
+    <form action="/add_option/<%= quest_id %>" method="POST">
+        <input type="text" name="option_text" placeholder="Option text">
+        <input type="submit" value="Add option">
+    </form>
+</body>
+</html>
