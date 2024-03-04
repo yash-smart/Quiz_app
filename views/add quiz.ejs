@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add quiz</title>
+</head>
+<body>
+    <form action="/add_quiz/<%= id %>" method="POST">
+        <p>Quiz name :</p>
+        <input type="text" name="quiz_name" placeholder="Quiz name">
+        <input type="submit" value="Add quiz">
+    </form>
+</body>
+</html>

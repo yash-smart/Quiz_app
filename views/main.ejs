@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzes</title>
+</head>
+<body>
+    <% if (locals.data.length > 0) {%>
+        <% for(let i = 0;i<data.length;i++) { %>
+            <% if(data[i].status == 0) { %>
+                <a href="/quiz/<%= data[i].id %>"><%= data[i].quiz_name %> - Taking responses</a>
+            <% }else { %>
+                <a href="/quiz/<%= data[i].id %>"><%= data[i].quiz_name %> - Isn't Taking responses</a>
+            <% } %>
+        <% } %>
+    <% } else {%>
+        <h1>No quizzes found</h1>
+        <a href="/add_quiz/<%= id %>">Create one?</a>
+    <% } %>
+</body>
+</html>
