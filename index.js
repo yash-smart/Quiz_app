@@ -76,7 +76,18 @@ app.post('/add_quiz/:id',async (req,res) => {
 app.get('/quiz/:id',async (req,res) => {
     let quiz_questions = await db.query('select * from questions where quiz_id = $1',[req.params.id])
     quiz_questions = quiz_questions.rows
-    res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id});
+    let options = [];
+    for (let i=0;i<quiz_questions.length;i++) {
+        let data = await db.query('select option_number,option_text from options where question_id=$1;',[quiz_questions[i].id]);
+        let temp = []
+        console.log(data.rows)
+        for (let j=0;j<data.rows.length;j++) {
+            temp.push(data.rows[j])
+        }
+        options.push(temp);
+    }
+    console.log(options)
+    res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options});
 })
 
 app.get('/new-question/:id',async (req,res) => {

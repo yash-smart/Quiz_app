@@ -9,6 +9,9 @@
     <% if (question_data.length > 0) { %>
         <% for (let i=0;i<question_data.length;i++) { %>
             <a href="/question/<%= question_data[i].id %>"><%= question_data[i].question_text %></a>
+            <% for (let j=0;j<options[i].length;j++) { %>
+                <p><%= options[i][j].option_number %> : <%= options[i][j].option_text %></p>
+            <% } %>
         <% } %>
         <a href="/new-question/<%= quiz_id %>">Add question</a>
     <% } else { %>
