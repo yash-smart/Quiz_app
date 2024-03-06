@@ -78,7 +78,7 @@ app.get('/quiz/:id',async (req,res) => {
     quiz_questions = quiz_questions.rows
     let options = [];
     for (let i=0;i<quiz_questions.length;i++) {
-        let data = await db.query('select option_number,option_text from options where question_id=$1;',[quiz_questions[i].id]);
+        let data = await db.query('select option_number,option_text from options where question_id=$1 order by option_number;',[quiz_questions[i].id]);
         let temp = []
         console.log(data.rows)
         for (let j=0;j<data.rows.length;j++) {
