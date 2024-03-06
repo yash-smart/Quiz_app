@@ -19,7 +19,15 @@ const db = new pg.Client({
     port: 5432,
   });
   db.connect();
-  
+
+function membership(array,element) {
+    for (let i=0;i<array.length;i++) {
+        if (array[i] == element) {
+            return (true);
+        }
+    }
+    return (false);
+}
 
 app.get("/",(req,res) => {
     res.render("index.ejs")
@@ -136,7 +144,9 @@ app.post('/correct/:id',async (req,res) => {
     for (let i=0;i<data_options.rows.length;i++) {
         options.push(data_options.rows[i].option_number);
     }
-    if (req.body.correct_option in options) {
+    // console.log(options)
+    // console.log(membership(options,req.body.correct_option))
+    if (membership(options,req.body.correct_option)) {
         await db.query('update questions set correct_option=$1 where id=$2;',[req.body.correct_option,req.params.id]);
     }
     res.redirect('/question/'+req.params.id)
