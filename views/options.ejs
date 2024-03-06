@@ -11,5 +11,9 @@
         <p><%= option_data[i].option_number %>: <%= option_data[i].option_text %></p>
     <% } %>
     <a href="/add_option/<%= question_id %>">Add option</a>
+    <form action="/correct/<%= question_id %>" method="POST">
+        <input type="number" name="correct_option" placeholder="Correct Option">
+        <input type="submit" value="Set correct option">
+    </form>
 </body>
 </html>

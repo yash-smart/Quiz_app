@@ -37,7 +37,7 @@ app.post('/ini',async (req,res) => {
     if (data_obj.rows.length != 0) {
         let data = data_obj.rows[0].password;
         let user_id = data_obj.rows[0].id;
-        console.log(user_id)
+        // console.log(user_id)
         if (data === Password) {
             res.redirect('/main/'+user_id)
         }
@@ -80,13 +80,13 @@ app.get('/quiz/:id',async (req,res) => {
     for (let i=0;i<quiz_questions.length;i++) {
         let data = await db.query('select option_number,option_text from options where question_id=$1 order by option_number;',[quiz_questions[i].id]);
         let temp = []
-        console.log(data.rows)
+        // console.log(data.rows)
         for (let j=0;j<data.rows.length;j++) {
             temp.push(data.rows[j])
         }
         options.push(temp);
     }
-    console.log(options)
+    // console.log(options)
     res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options});
 })
 
@@ -113,19 +113,32 @@ app.post('/add_option/:id',async (req,res) => {
     let option_number = await db.query('select max(option_number) as max from options where question_id=$1;',[req.params.id])
     if (option_number.rows.length > 0) {
         if (option_number.rows[0].max !== null) {
-            console.log(option_number.rows)
+            // console.log(option_number.rows)
             await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[option_number.rows[0].max+1,req.params.id,req.body.option_text]);
         }
         else {
-            console.log(1)
+            // console.log(1)
             await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[1,req.params.id,req.body.option_text]);
         }
     }
     else {
-        console.log(1)
+        // console.log(1)
         await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[1,req.params.id,req.body.option_text]);
     }
     
+    res.redirect('/question/'+req.params.id)
+})
+
+app.post('/correct/:id',async (req,res) => {
+    // console.log(req.body.correct_option)
+    let options = [];
+    let data_options = await db.query('select option_number from options where question_id = $1;',[req.params.id]);
+    for (let i=0;i<data_options.rows.length;i++) {
+        options.push(data_options.rows[i].option_number);
+    }
+    if (req.body.correct_option in options) {
+        await db.query('update questions set correct_option=$1 where id=$2;',[req.body.correct_option,req.params.id]);
+    }
     res.redirect('/question/'+req.params.id)
 })
 
