@@ -170,13 +170,24 @@ app.get('/form/:id',async(req,res) => {
 })
 
 app.get('/form/:id/:stud_id',async (req,res) => {
-    let quiz_data = await db.query('select * from quizzes where id=$1 and status = 0;',[req.params.id])
-    if (quiz_data.rows.length > 0) {
-        let quiz_name = quiz_data.rows[0].quiz_name;
-        let quiz_id = quiz_data.rows[0].id;
-        res.render('form.ejs',{quiz_name:quiz_name});
+    let user_data = await db.query('select id from login_credentials;');
+    // console.log(user_data)
+    let users = [];
+    for (let i=0;i<user_data.rows.length;i++) {
+        users.push(user_data.rows[0].id);
+    }
+    // console.log(users)
+    if (membership(users,req.params.stud_id)) {
+        let quiz_data = await db.query('select * from quizzes where id=$1 and status = 0;',[req.params.id])
+        if (quiz_data.rows.length > 0) {
+            let quiz_name = quiz_data.rows[0].quiz_name;
+            let quiz_id = quiz_data.rows[0].id;
+            res.render('form.ejs',{quiz_name:quiz_name});
+        } else {
+            res.send('Form doesn\'t exist');
+        }
     } else {
-        res.send('Form doesn\'t exist');
+        res.send('User not found.')
     }
 })
 
