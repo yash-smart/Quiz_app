@@ -171,9 +171,13 @@ app.get('/form/:id',async(req,res) => {
 
 app.get('/form/:id/:stud_id',async (req,res) => {
     let quiz_data = await db.query('select * from quizzes where id=$1 and status = 0;',[req.params.id])
-    let quiz_name = quiz_data.rows[0].quiz_name;
-    let quiz_id = quiz_data.rows[0].id;
-    res.render('form.ejs',{quiz_name:quiz_name});
+    if (quiz_data.rows.length > 0) {
+        let quiz_name = quiz_data.rows[0].quiz_name;
+        let quiz_id = quiz_data.rows[0].id;
+        res.render('form.ejs',{quiz_name:quiz_name});
+    } else {
+        res.send('Form doesn\'t exist');
+    }
 })
 
 app.post('/form-login/:form_id',async (req,res) => {
