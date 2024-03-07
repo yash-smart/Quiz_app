@@ -82,6 +82,8 @@ app.post('/add_quiz/:id',async (req,res) => {
 })
 
 app.get('/quiz/:id',async (req,res) => {
+    let owner_data = await db.query('select user_id from quizzes where id = $1;',[req.params.id]);
+    let owner = owner_data.rows[0].user_id;
     let quiz_questions = await db.query('select * from questions where quiz_id = $1',[req.params.id])
     quiz_questions = quiz_questions.rows
     let options = [];
@@ -95,11 +97,13 @@ app.get('/quiz/:id',async (req,res) => {
         options.push(temp);
     }
     // console.log(options)
-    res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options});
+    res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner});
 })
 
 app.get('/new-question/:id',async (req,res) => {
-    res.render('new_question.ejs',{quiz_id: req.params.id})
+    let owner_data_4 = await db.query('select user_id from quizzes where id = $1;',[req.params.id]);
+    let owner_4 = owner_data_4.rows[0].user_id;
+    res.render('new_question.ejs',{quiz_id: req.params.id,owner:owner_4})
 })
 
 app.post('/question_submit/:id',async (req,res) => {
@@ -108,13 +112,21 @@ app.post('/question_submit/:id',async (req,res) => {
 })
 
 app.get('/question/:id',async (req,res) => {
+    let quiz_id_data = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
+    let quiz_id = quiz_id_data.rows[0].quiz_id;
+    let owner_data_2 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+    let owner_2 = owner_data_2.rows[0].user_id;
     let question = await db.query('select question_text,marks,correct_option from questions where id=$1',[req.params.id])
     let option_data = await db.query('select * from options where question_id=$1',[req.params.id])
-    res.render('options.ejs',{question_data: question.rows[0],option_data:option_data.rows,question_id:req.params.id});
+    res.render('options.ejs',{question_data: question.rows[0],option_data:option_data.rows,question_id:req.params.id,quiz_id:quiz_id,owner:owner_2});
 })
 
 app.get('/add_option/:id',async (req,res)=> {
-    res.render('add_option.ejs',{quest_id:req.params.id})
+    let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
+    let quiz_id = quiz_id_data_2.rows[0].quiz_id;
+    let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+    let owner_3 = owner_data_3.rows[0].user_id;
+    res.render('add_option.ejs',{quest_id:req.params.id,quiz_id:quiz_id,owner:owner_3})
 })
 
 app.post('/add_option/:id',async (req,res) => {
