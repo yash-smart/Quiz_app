@@ -50,11 +50,11 @@ app.post('/ini',async (req,res) => {
             res.redirect('/main/'+user_id)
         }
         else {
-            res.send('Login failed')
+            res.redirect('/')
         }
     }
     else {
-        res.send('Login failed')
+        res.redirect('/')
     }
     
 })
@@ -162,6 +162,40 @@ app.post('/correct/:id',async (req,res) => {
         await db.query('update questions set correct_option=$1 where id=$2;',[req.body.correct_option,req.params.id]);
     }
     res.redirect('/question/'+req.params.id)
+})
+
+app.get('/form/:id',async(req,res) => {
+
+    res.render('index.ejs',{signin: true,form_id:req.params.id});
+})
+
+app.get('/form/:id/:stud_id',async (req,res) => {
+    let quiz_data = await db.query('select * from quizzes where id=$1 and status = 0;',[req.params.id])
+    let quiz_name = quiz_data.rows[0].quiz_name;
+    let quiz_id = quiz_data.rows[0].id;
+    res.render('form.ejs',{quiz_name:quiz_name});
+})
+
+app.post('/form-login/:form_id',async (req,res) => {
+    let Username = req.body.username;
+    let Password = md5(req.body.password);
+    let data_obj = await db.query('select id,password from login_credentials where username = $1;',[Username])
+    // console.log(data_obj)
+    if (data_obj.rows.length != 0) {
+        let data = data_obj.rows[0].password;
+        let user_id = data_obj.rows[0].id;
+        // console.log(user_id)
+        if (data === Password) {
+            res.redirect('/form/'+req.params.form_id+'/'+user_id)
+        }
+        else {
+            res.redirect('/form/'+req.params.form_id)
+        }
+    }
+    else {
+        res.redirect('/form/'+req.params.form_id)
+    }
+    
 })
 
 app.listen(port, () => {

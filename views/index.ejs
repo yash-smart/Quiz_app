@@ -7,14 +7,26 @@
 </head>
 <body>
     <h1>Login</h1>
-    <form action="/ini" method="POST">
-        <p>Username</p>
-        <input type="text" name="username" placeholder="Username">
-        <p>Password</p>
-        <input type="password" name="password" placeholder="Password">
-        <input type="submit" value="Submit">
-    </form>
-    <p>Not registered?</p>
-    <a href="/register">Register here!</a>
+    <% if (locals.signin == null) {%>
+        <form action="/ini" method="POST">
+            <p>Username</p>
+            <input type="text" name="username" placeholder="Username">
+            <p>Password</p>
+            <input type="password" name="password" placeholder="Password">
+            <input type="submit" value="Submit">
+        </form>
+        <p>Not registered?</p>
+        <a href="/register">Register here!</a>
+    <% } else { %>
+        <form action="/form-login/<%= form_id %>" method="POST">
+            <p>Username</p>
+            <input type="text" name="username" placeholder="Username">
+            <p>Password</p>
+            <input type="password" name="password" placeholder="Password">
+            <input type="submit" value="Submit">
+        </form>
+        <p>Not registered?</p>
+        <a href="/form-register/<%= form_id %>">Register here!</a>
+    <% } %>
 </body>
 </html>
