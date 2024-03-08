@@ -182,7 +182,25 @@ app.get('/form/:id/:stud_id',async (req,res) => {
         if (quiz_data.rows.length > 0) {
             let quiz_name = quiz_data.rows[0].quiz_name;
             let quiz_id = quiz_data.rows[0].id;
-            res.render('form.ejs',{quiz_name:quiz_name});
+            let questions_data = await db.query('select * from questions where quiz_id=$1;',[quiz_id]);
+            questions_data = questions_data.rows;
+            let questions = [];
+            let marks = [];
+            let options = [];
+            let ids = [];
+            for (let i=0;i<questions_data.length;i++) {
+                questions.push(questions_data[i].question_text);
+                marks.push(questions_data[i].marks);
+                ids.push(questions_data[i].id)
+                let options_data = await db.query('select * from options where question_id=$1 order by option_number;',[questions_data[i].id]);
+                options_data = options_data.rows;
+                let temp = [];
+                for (let j=0;j<options_data.length;j++) {
+                    temp.push(options_data[j].option_text);
+                }
+                options.push(temp);
+            }
+            res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids});
         } else {
             res.send('Form doesn\'t exist');
         }
@@ -211,6 +229,19 @@ app.post('/form-login/:form_id',async (req,res) => {
         res.redirect('/form/'+req.params.form_id)
     }
     
+})
+
+app.post('/form-submit/:form_id/:stud_id',(req,res)=> {
+    console.log(req.body)
+    let qustions_ids = [];
+    let option_selected = [];
+    for (let i in req.body) {
+        qustions_ids.push(i);
+        option_selected.push(req.body[i]);
+    }
+    console.log(qustions_ids);
+    console.log(option_selected);
+    res.redirect('/form/'+req.params.form_id+'/'+req.params.stud_id);
 })
 
 app.listen(port, () => {
