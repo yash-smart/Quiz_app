@@ -10,9 +10,13 @@
     <form action="/form-submit/<%= form_id %>/<%= stud_id %>" method="POST">
         <% for (let i=0;i<questions.length;i++) { %>
             <p><%= questions[i] %> - <%= marks[i] %> points</p>
-            <% for (let j=0;j<options[i].length;j++) { %>
-                <input type="radio" name="<%= question_ids[i] %>" value="<%= (j+1) %>">
-                <label for="Option 1"><%= options[i][j] %></label><br>
+            <% if(text_box[i] != 1) { %>
+                <% for (let j=0;j<options[i].length;j++) { %>
+                    <input type="radio" name="<%= question_ids[i] %>" value="<%= (j+1) %>">
+                    <label for="Option 1"><%= options[i][j] %></label><br>
+                <% } %>
+            <% } else { %>
+                <textarea name="<%= question_ids[i] %>" ></textarea><br>
             <% } %>
         <% } %>
         <input type="submit" value="Submit">

@@ -116,8 +116,9 @@ app.get('/question/:id',async (req,res) => {
     let quiz_id = quiz_id_data.rows[0].quiz_id;
     let owner_data_2 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
     let owner_2 = owner_data_2.rows[0].user_id;
-    let question = await db.query('select question_text,marks,correct_option from questions where id=$1',[req.params.id])
+    let question = await db.query('select question_text,marks,correct_option,input_type,correct_answer from questions where id=$1',[req.params.id])
     let option_data = await db.query('select * from options where question_id=$1',[req.params.id])
+    // console.log(question.rows[0]);
     res.render('options.ejs',{question_data: question.rows[0],option_data:option_data.rows,question_id:req.params.id,quiz_id:quiz_id,owner:owner_2});
 })
 
@@ -188,10 +189,12 @@ app.get('/form/:id/:stud_id',async (req,res) => {
             let marks = [];
             let options = [];
             let ids = [];
+            let text_box = [];
             for (let i=0;i<questions_data.length;i++) {
                 questions.push(questions_data[i].question_text);
                 marks.push(questions_data[i].marks);
                 ids.push(questions_data[i].id)
+                text_box.push(questions_data[i].input_type);
                 let options_data = await db.query('select * from options where question_id=$1 order by option_number;',[questions_data[i].id]);
                 options_data = options_data.rows;
                 let temp = [];
@@ -200,7 +203,7 @@ app.get('/form/:id/:stud_id',async (req,res) => {
                 }
                 options.push(temp);
             }
-            res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids});
+            res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids,text_box:text_box});
         } else {
             res.send('Form doesn\'t exist');
         }
@@ -243,6 +246,18 @@ app.post('/form-submit/:form_id/:stud_id',(req,res)=> {
     console.log(option_selected);
     res.redirect('/form/'+req.params.form_id+'/'+req.params.stud_id);
 })
+
+app.get('/add-text-box/:quest_id',async (req,res) => {
+    await db.query('update questions set input_type=1 where id=$1;',[req.params.quest_id]);
+    await db.query('delete from options where question_id=$1;',[req.params.quest_id]);
+    res.redirect('/question/'+req.params.quest_id)
+})
+
+app.post('/correct-answer/:quest_id',async (req,res)=> {
+    let test = await db.query('update questions set correct_answer=$1 where id=$2;',[req.body.correct_answer,req.params.quest_id]);
+    // console.log(test)
+    res.redirect('/question/'+req.params.quest_id)
+}) 
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

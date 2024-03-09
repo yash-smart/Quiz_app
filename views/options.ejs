@@ -23,11 +23,21 @@
             <p><%= option_data[i].option_number %>: <%= option_data[i].option_text %></p>
         <% } %>
     <% } %>
-    <a href="/add_option/<%= question_id %>">Add option</a>
-    <form action="/correct/<%= question_id %>" method="POST">
-        <input type="number" name="correct_option" placeholder="Correct Option">
-        <input type="submit" value="Set correct option">
-    </form>
+    <% if (question_data.input_type != 1) { %>
+        <a href="/add-text-box/<%= question_id %>">Add text box</a>
+        <a href="/add_option/<%= question_id %>">Add option</a>
+        <form action="/correct/<%= question_id %>" method="POST">
+            <input type="number" name="correct_option" placeholder="Correct Option">
+            <input type="submit" value="Set correct option">
+        </form>
+    <% } else {%>
+        <p>Correct answer set :</p>
+        <p><%= question_data.correct_answer %></p>
+        <form action="/correct-answer/<%= question_id %>" method="POST">
+            <textarea name="correct_answer" rows="4" cols="50"></textarea>
+            <input type="submit" value="Set correct answer">
+        </form>
+    <% } %>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

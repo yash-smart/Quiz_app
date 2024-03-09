@@ -22,6 +22,7 @@
                     <p><%= options[i][j].option_number %> : <%= options[i][j].option_text %></p>
                 <% } %>
             <% } %>
+            <p style="color: red;"><%= question_data[i].correct_answer %></p>
         <% } %>
         <a href="/new-question/<%= quiz_id %>">Add question</a>
     <% } else { %>
