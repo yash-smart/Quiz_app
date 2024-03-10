@@ -84,7 +84,7 @@ app.post('/add_quiz/:id',async (req,res) => {
 app.get('/quiz/:id',async (req,res) => {
     let owner_data = await db.query('select user_id from quizzes where id = $1;',[req.params.id]);
     let owner = owner_data.rows[0].user_id;
-    let quiz_questions = await db.query('select * from questions where quiz_id = $1',[req.params.id])
+    let quiz_questions = await db.query('select * from questions where quiz_id = $1 order by id;',[req.params.id])
     quiz_questions = quiz_questions.rows
     let options = [];
     for (let i=0;i<quiz_questions.length;i++) {
@@ -183,7 +183,7 @@ app.get('/form/:id/:stud_id',async (req,res) => {
         if (quiz_data.rows.length > 0) {
             let quiz_name = quiz_data.rows[0].quiz_name;
             let quiz_id = quiz_data.rows[0].id;
-            let questions_data = await db.query('select * from questions where quiz_id=$1;',[quiz_id]);
+            let questions_data = await db.query('select * from questions where quiz_id=$1 order by id;',[quiz_id]);
             questions_data = questions_data.rows;
             let questions = [];
             let marks = [];
