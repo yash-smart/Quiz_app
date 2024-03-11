@@ -82,8 +82,6 @@ app.post('/register',async (req,res) => {
     } else {
         res.render('index.ejs',{users_exist:true})
     }
-    
-    
 })
 
 app.get('/add_quiz/:id',(req,res) => {
@@ -189,9 +187,8 @@ app.get('/form/:id/:stud_id',async (req,res) => {
     // console.log(user_data)
     let users = [];
     for (let i=0;i<user_data.rows.length;i++) {
-        users.push(user_data.rows[0].id);
+        users.push(user_data.rows[i].id);
     }
-    // console.log(users)
     if (membership(users,req.params.stud_id)) {
         let quiz_data = await db.query('select * from quizzes where id=$1 and status = 0;',[req.params.id])
         let submitted_data = await db.query('select user_id from responses;')
@@ -295,6 +292,29 @@ app.post('/correct-answer/:quest_id',async (req,res)=> {
     // console.log(test)
     res.redirect('/question/'+req.params.quest_id)
 }) 
+
+app.get('/form-register/:form_id',(req,res) => {
+    res.render('register.ejs',{form: true,form_id: req.params.form_id})
+})
+
+app.post('/form-register/:form_id',async (req,res) => {
+    let Username = req.body.username;
+    let Password = md5(req.body.password);
+    let user_data = await db.query('select username from login_credentials;')
+    let users_exist = false;
+    for (let i=0;i<user_data.rows.length;i++) {
+        if (user_data.rows[i].username == Username) {
+            users_exist = true;
+        }
+    }
+    console.log(users_exist)
+    if (users_exist == false) {
+        await db.query('insert into login_credentials(username,password) values($1,$2)',[Username,Password])
+        res.redirect('/form/'+req.params.form_id)
+    } else {
+        res.render('index.ejs',{users_exist:true,signin:true,form_id: req.params.form_id})
+    }
+})
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
