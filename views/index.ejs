@@ -28,5 +28,8 @@
         <p>Not registered?</p>
         <a href="/form-register/<%= form_id %>">Register here!</a>
     <% } %>
+    <% if (locals.users_exist == true) { %>
+        <p style="color: red;">Username already exist.</p>
+    <% } %>
 </body>
 </html>

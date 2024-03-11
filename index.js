@@ -78,9 +78,12 @@ app.post('/register',async (req,res) => {
     console.log(users_exist)
     if (users_exist == false) {
         await db.query('insert into login_credentials(username,password) values($1,$2)',[Username,Password])
+        res.redirect('/')
+    } else {
+        res.render('index.ejs',{users_exist:true})
     }
     
-    res.redirect('/')
+    
 })
 
 app.get('/add_quiz/:id',(req,res) => {
