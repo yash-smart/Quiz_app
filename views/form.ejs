@@ -6,20 +6,24 @@
     <title>Form</title>
 </head>
 <body>
-    <h1><%= quiz_name %></h1>
-    <form action="/form-submit/<%= form_id %>/<%= stud_id %>" method="POST">
-        <% for (let i=0;i<questions.length;i++) { %>
-            <p><%= questions[i] %> - <%= marks[i] %> points</p>
-            <% if(text_box[i] != 1) { %>
-                <% for (let j=0;j<options[i].length;j++) { %>
-                    <input type="radio" name="<%= question_ids[i] %>" value="<%= (j+1) %>">
-                    <label for="Option 1"><%= options[i][j] %></label><br>
+    <% if (submitted == false) { %>
+        <h1><%= quiz_name %></h1>
+        <form action="/form-submit/<%= form_id %>/<%= stud_id %>" method="POST">
+            <% for (let i=0;i<questions.length;i++) { %>
+                <p><%= questions[i] %> - <%= marks[i] %> points</p>
+                <% if(text_box[i] != 1) { %>
+                    <% for (let j=0;j<options[i].length;j++) { %>
+                        <input type="radio" name="<%= question_ids[i] %>" value="<%= (j+1) %>">
+                        <label for="Option 1"><%= options[i][j] %></label><br>
+                    <% } %>
+                <% } else { %>
+                    <textarea name="<%= question_ids[i] %>" ></textarea><br>
                 <% } %>
-            <% } else { %>
-                <textarea name="<%= question_ids[i] %>" ></textarea><br>
             <% } %>
-        <% } %>
-        <input type="submit" value="Submit">
+            <input type="submit" value="Submit">
     </form>
+    <% } else { %>
+        <h1>Already submitted</h1>
+    <% } %>
 </body>
 </html>

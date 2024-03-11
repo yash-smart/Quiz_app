@@ -65,10 +65,21 @@ app.get('/main/:id',async (req,res) => {
     res.render('main.ejs',{data: quizzes_obj.rows,id: req.params.id})
 })
 
-app.post('/register',(req,res) => {
+app.post('/register',async (req,res) => {
     let Username = req.body.username;
     let Password = md5(req.body.password);
-    db.query('insert into login_credentials(username,password) values($1,$2)',[Username,Password])
+    let user_data = await db.query('select username from login_credentials;')
+    let users_exist = false;
+    for (let i=0;i<user_data.rows.length;i++) {
+        if (user_data.rows[i].username == Username) {
+            users_exist = true;
+        }
+    }
+    console.log(users_exist)
+    if (users_exist == false) {
+        await db.query('insert into login_credentials(username,password) values($1,$2)',[Username,Password])
+    }
+    
     res.redirect('/')
 })
 
@@ -180,6 +191,17 @@ app.get('/form/:id/:stud_id',async (req,res) => {
     // console.log(users)
     if (membership(users,req.params.stud_id)) {
         let quiz_data = await db.query('select * from quizzes where id=$1 and status = 0;',[req.params.id])
+        let submitted_data = await db.query('select user_id from responses;')
+        let submitted = null;
+        for (let i=0;i<submitted_data.rows.length;i++) {
+            if (submitted_data.rows[i].user_id == req.params.stud_id) {
+                submitted = true;
+            }
+        }
+        if (submitted == null) {
+            submitted = false;
+        }
+        // console.log(submitted)
         if (quiz_data.rows.length > 0) {
             let quiz_name = quiz_data.rows[0].quiz_name;
             let quiz_id = quiz_data.rows[0].id;
@@ -203,7 +225,7 @@ app.get('/form/:id/:stud_id',async (req,res) => {
                 }
                 options.push(temp);
             }
-            res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids,text_box:text_box});
+            res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids,text_box:text_box,submitted:submitted});
         } else {
             res.send('Form doesn\'t exist');
         }
@@ -234,16 +256,28 @@ app.post('/form-login/:form_id',async (req,res) => {
     
 })
 
-app.post('/form-submit/:form_id/:stud_id',(req,res)=> {
+app.post('/form-submit/:form_id/:stud_id',async (req,res)=> {
     console.log(req.body)
-    let qustions_ids = [];
+    let questions_ids = [];
     let option_selected = [];
+    let input_type = [];
     for (let i in req.body) {
-        qustions_ids.push(i);
+        questions_ids.push(i);
+        let data = await db.query('select input_type from questions where id=$1;',[i])
+        input_type.push(data.rows[0].input_type);
         option_selected.push(req.body[i]);
     }
-    console.log(qustions_ids);
+    console.log(questions_ids);
     console.log(option_selected);
+    console.log(input_type)
+    for (let i=0;i<questions_ids.length;i++) {
+        if (input_type[i] == null) {
+            await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,$3,null,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
+        } else {
+            await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,null,$3,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
+        }
+        
+    }
     res.redirect('/form/'+req.params.form_id+'/'+req.params.stud_id);
 })
 
