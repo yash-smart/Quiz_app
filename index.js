@@ -257,26 +257,28 @@ app.post('/form-login/:form_id',async (req,res) => {
 })
 
 app.post('/form-submit/:form_id/:stud_id',async (req,res)=> {
-    console.log(req.body)
-    let questions_ids = [];
-    let option_selected = [];
-    let input_type = [];
-    for (let i in req.body) {
-        questions_ids.push(i);
-        let data = await db.query('select input_type from questions where id=$1;',[i])
-        input_type.push(data.rows[0].input_type);
-        option_selected.push(req.body[i]);
-    }
-    console.log(questions_ids);
-    console.log(option_selected);
-    console.log(input_type)
-    for (let i=0;i<questions_ids.length;i++) {
-        if (input_type[i] == null) {
-            await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,$3,null,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
-        } else {
-            await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,null,$3,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
+    let quiz_data_4 = await db.query('select status from quizzes where id=$1;',[req.params.form_id]);
+    if (quiz_data_4.rows[0].status == 0) {
+        console.log(req.body)
+        let questions_ids = [];
+        let option_selected = [];
+        let input_type = [];
+        for (let i in req.body) {
+            questions_ids.push(i);
+            let data = await db.query('select input_type from questions where id=$1;',[i])
+            input_type.push(data.rows[0].input_type);
+            option_selected.push(req.body[i]);
         }
-        
+        console.log(questions_ids);
+        console.log(option_selected);
+        console.log(input_type)
+        for (let i=0;i<questions_ids.length;i++) {
+            if (input_type[i] == null) {
+                await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,$3,null,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
+            } else {
+                await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,null,$3,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
+            }
+        }
     }
     res.redirect('/form/'+req.params.form_id+'/'+req.params.stud_id);
 })
