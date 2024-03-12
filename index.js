@@ -60,7 +60,7 @@ app.post('/ini',async (req,res) => {
 })
 
 app.get('/main/:id',async (req,res) => {
-    let quizzes_obj = await db.query('select * from quizzes where user_id = $1;',[req.params.id])
+    let quizzes_obj = await db.query('select * from quizzes where user_id = $1 order by status,id;',[req.params.id])
     // console.log(quizzes_obj.rows)
     res.render('main.ejs',{data: quizzes_obj.rows,id: req.params.id})
 })
@@ -94,7 +94,7 @@ app.post('/add_quiz/:id',async (req,res) => {
 })
 
 app.get('/quiz/:id',async (req,res) => {
-    let owner_data = await db.query('select user_id from quizzes where id = $1;',[req.params.id]);
+    let owner_data = await db.query('select user_id,status from quizzes where id = $1;',[req.params.id]);
     let owner = owner_data.rows[0].user_id;
     let quiz_questions = await db.query('select * from questions where quiz_id = $1 order by id;',[req.params.id])
     quiz_questions = quiz_questions.rows
@@ -109,7 +109,7 @@ app.get('/quiz/:id',async (req,res) => {
         options.push(temp);
     }
     // console.log(options)
-    res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner});
+    res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner,status: owner_data.rows[0].status});
 })
 
 app.get('/new-question/:id',async (req,res) => {
@@ -315,6 +315,17 @@ app.post('/form-register/:form_id',async (req,res) => {
         res.render('index.ejs',{users_exist:true,signin:true,form_id: req.params.form_id})
     }
 })
+
+app.get('/status-update/:quiz_id',async (req,res) => {
+    let quiz_data_3 = await db.query('select status from quizzes where id=$1;',[req.params.quiz_id]);
+    if (quiz_data_3.rows[0].status == 1) {
+        await db.query('update quizzes set status=0 where id =$1;',[req.params.quiz_id])
+    }
+    else {
+        await db.query('update quizzes set status=1 where id =$1;',[req.params.quiz_id])
+    }
+    res.redirect('/quiz/'+req.params.quiz_id)
+}) 
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
