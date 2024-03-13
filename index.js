@@ -112,13 +112,16 @@ app.get('/add_quiz/:id',(req,res) => {
 })
 
 app.post('/add_quiz/:id',async (req,res) => {
-    if (req.session.user == req.params.id) {
-        await db.query('Insert into quizzes(user_id,quiz_name,status) values($1,$2,0);',[req.params.id,req.body.quiz_name]);
-        res.redirect('/main/'+req.params.id)
-    } else {
-        res.send('Unauthorized')
+    try {
+        if (req.session.user == req.params.id) {
+            await db.query('Insert into quizzes(user_id,quiz_name,status) values($1,$2,0);',[req.params.id,req.body.quiz_name]);
+            res.redirect('/main/'+req.params.id)
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL')
     }
-    
 })
 
 app.get('/quiz/:id',async (req,res) => {
@@ -165,13 +168,17 @@ app.get('/new-question/:id',async (req,res) => {
 })
 
 app.post('/question_submit/:id',async (req,res) => {
-    let owner_data_4 = await db.query('select user_id from quizzes where id = $1;',[req.params.id]);
-    let owner_4 = owner_data_4.rows[0].user_id;
-    if (req.session.user == owner_4) {
-        await db.query('insert into questions(quiz_id,question_text,marks) values($1,$2,$3);',[req.params.id,req.body.question_text,req.body.marks]);
-        res.redirect('/quiz/'+req.params.id);
-    } else {
-        res.send('Unauthorized')
+    try {
+        let owner_data_4 = await db.query('select user_id from quizzes where id = $1;',[req.params.id]);
+        let owner_4 = owner_data_4.rows[0].user_id;
+        if (req.session.user == owner_4) {
+            await db.query('insert into questions(quiz_id,question_text,marks) values($1,$2,$3);',[req.params.id,req.body.question_text,req.body.marks]);
+            res.redirect('/quiz/'+req.params.id);
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL')
     }
 })
 
@@ -211,54 +218,62 @@ app.get('/add_option/:id',async (req,res)=> {
 })
 
 app.post('/add_option/:id',async (req,res) => {
-    let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
-    let quiz_id = quiz_id_data_2.rows[0].quiz_id;
-    let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
-    let owner_3 = owner_data_3.rows[0].user_id;
-    if (req.session.user == owner_3) {
-        let option_number = await db.query('select max(option_number) as max from options where question_id=$1;',[req.params.id])
-        if (option_number.rows.length > 0) {
-            if (option_number.rows[0].max !== null) {
-            // console.log(option_number.rows)
-                await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[option_number.rows[0].max+1,req.params.id,req.body.option_text]);
+    try {
+        let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
+        let quiz_id = quiz_id_data_2.rows[0].quiz_id;
+        let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_3 = owner_data_3.rows[0].user_id;
+        if (req.session.user == owner_3) {
+            let option_number = await db.query('select max(option_number) as max from options where question_id=$1;',[req.params.id])
+            if (option_number.rows.length > 0) {
+                if (option_number.rows[0].max !== null) {
+                // console.log(option_number.rows)
+                    await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[option_number.rows[0].max+1,req.params.id,req.body.option_text]);
+                }
+                else {
+                // console.log(1)
+                    await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[1,req.params.id,req.body.option_text]);
+                }
             }
             else {
             // console.log(1)
                 await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[1,req.params.id,req.body.option_text]);
             }
-        }
-        else {
-        // console.log(1)
-            await db.query('Insert into options(option_number,question_id,option_text) values($1,$2,$3);',[1,req.params.id,req.body.option_text]);
-        }
     
-        res.redirect('/question/'+req.params.id)
+            res.redirect('/question/'+req.params.id)
 
-    } else {
-        res.send('Unauthorized')
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL')
     }
 })
 
 app.post('/correct/:id',async (req,res) => {
     // console.log(req.body.correct_option)
-    let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
-    let quiz_id = quiz_id_data_2.rows[0].quiz_id;
-    let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
-    let owner_3 = owner_data_3.rows[0].user_id;
-    if (req.session.user == owner_3) {
-        let options = [];
-        let data_options = await db.query('select option_number from options where question_id = $1;',[req.params.id]);
-        for (let i=0;i<data_options.rows.length;i++) {
-            options.push(data_options.rows[i].option_number);
+    try {
+        let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
+        let quiz_id = quiz_id_data_2.rows[0].quiz_id;
+        let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_3 = owner_data_3.rows[0].user_id;
+        if (req.session.user == owner_3) {
+            let options = [];
+            let data_options = await db.query('select option_number from options where question_id = $1;',[req.params.id]);
+            for (let i=0;i<data_options.rows.length;i++) {
+                options.push(data_options.rows[i].option_number);
+            }
+        // console.log(options)
+        // console.log(membership(options,req.body.correct_option))
+            if (membership(options,req.body.correct_option)) {
+                await db.query('update questions set correct_option=$1 where id=$2;',[req.body.correct_option,req.params.id]);
+            }
+            res.redirect('/question/'+req.params.id)
+        } else {
+            res.send('Unauthorized')
         }
-    // console.log(options)
-    // console.log(membership(options,req.body.correct_option))
-        if (membership(options,req.body.correct_option)) {
-            await db.query('update questions set correct_option=$1 where id=$2;',[req.body.correct_option,req.params.id]);
-        }
-        res.redirect('/question/'+req.params.id)
-    } else {
-        res.send('Unauthorized')
+    } catch {
+        res.send('Invalid URL');
     }
 })
 
@@ -356,33 +371,37 @@ app.post('/form-login/:form_id',async (req,res) => {
 })
 
 app.post('/form-submit/:form_id/:stud_id',async (req,res)=> {
-    if (req.session.user == req.params.stud_id) {
-        let quiz_data_4 = await db.query('select status from quizzes where id=$1;',[req.params.form_id]);
-        if (quiz_data_4.rows[0].status == 0) {
-            console.log(req.body)
-            let questions_ids = [];
-            let option_selected = [];
-            let input_type = [];
-            for (let i in req.body) {
-                questions_ids.push(i);
-                let data = await db.query('select input_type from questions where id=$1;',[i])
-                input_type.push(data.rows[0].input_type);
-                option_selected.push(req.body[i]);
-            }
-            console.log(questions_ids);
-            console.log(option_selected);
-            console.log(input_type)
-            for (let i=0;i<questions_ids.length;i++) {
-                if (input_type[i] == null) {
-                    await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,$3,null,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
-                } else {
-                    await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,null,$3,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
+    try {
+        if (req.session.user == req.params.stud_id) {
+            let quiz_data_4 = await db.query('select status from quizzes where id=$1;',[req.params.form_id]);
+            if (quiz_data_4.rows[0].status == 0) {
+                console.log(req.body)
+                let questions_ids = [];
+                let option_selected = [];
+                let input_type = [];
+                for (let i in req.body) {
+                    questions_ids.push(i);
+                    let data = await db.query('select input_type from questions where id=$1;',[i])
+                    input_type.push(data.rows[0].input_type);
+                    option_selected.push(req.body[i]);
+                }
+                console.log(questions_ids);
+                console.log(option_selected);
+                console.log(input_type)
+                for (let i=0;i<questions_ids.length;i++) {
+                    if (input_type[i] == null) {
+                        await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,$3,null,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
+                    } else {
+                        await db.query('insert into responses(user_id,question_id,option_answer,text_answer,form_id) values($1,$2,null,$3,$4);',[req.params.stud_id,questions_ids[i],option_selected[i],req.params.form_id])
+                    }
                 }
             }
+            res.redirect('/form/'+req.params.form_id+'/'+req.params.stud_id);
+        } else {
+            res.send('Unauthorized')
         }
-        res.redirect('/form/'+req.params.form_id+'/'+req.params.stud_id);
-    } else {
-        res.send('Unauthorized')
+    } catch {
+        res.send('Invalid URL')
     }
 })
 
@@ -405,16 +424,20 @@ app.get('/add-text-box/:quest_id',async (req,res) => {
 })
 
 app.post('/correct-answer/:quest_id',async (req,res)=> {
-    let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.quest_id])
-    let quiz_id = quiz_id_data_2.rows[0].quiz_id;
-    let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
-    let owner_3 = owner_data_3.rows[0].user_id;
-    if (req.session.user == owner_3) {
-        let test = await db.query('update questions set correct_answer=$1 where id=$2;',[req.body.correct_answer,req.params.quest_id]);
-        // console.log(test)
-        res.redirect('/question/'+req.params.quest_id)
-    } else {
-        res.send('Unauthorized')
+    try {
+        let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.quest_id])
+        let quiz_id = quiz_id_data_2.rows[0].quiz_id;
+        let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_3 = owner_data_3.rows[0].user_id;
+        if (req.session.user == owner_3) {
+            let test = await db.query('update questions set correct_answer=$1 where id=$2;',[req.body.correct_answer,req.params.quest_id]);
+            // console.log(test)
+            res.redirect('/question/'+req.params.quest_id)
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL')
     }
 }) 
 
