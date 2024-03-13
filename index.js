@@ -71,14 +71,17 @@ app.post('/ini',async (req,res) => {
 })
 
 app.get('/main/:id',async (req,res) => {
-    let quizzes_obj = await db.query('select * from quizzes where user_id = $1 order by status,id;',[req.params.id])
-    // console.log(quizzes_obj.rows)
-    if (req.session.user == req.params.id) {
-        res.render('main.ejs',{data: quizzes_obj.rows,id: req.params.id})
-    } else {
-        res.send("Unauthorized")
+    try {
+        let quizzes_obj = await db.query('select * from quizzes where user_id = $1 order by status,id;',[req.params.id])
+        // console.log(quizzes_obj.rows)
+        if (req.session.user == req.params.id) {
+            res.render('main.ejs',{data: quizzes_obj.rows,id: req.params.id})
+        } else {
+            res.send("Unauthorized")
+        }
+    } catch {
+        res.send('Invalid URL')
     }
-    
 })
 
 app.post('/register',async (req,res) => {
@@ -119,37 +122,45 @@ app.post('/add_quiz/:id',async (req,res) => {
 })
 
 app.get('/quiz/:id',async (req,res) => {
-    let owner_data = await db.query('select user_id,status from quizzes where id = $1;',[req.params.id]);
-    let owner = owner_data.rows[0].user_id;
-    console.log(owner)
-    console.log(req.session.user)
-    if (req.session.user == owner) {
-        let quiz_questions = await db.query('select * from questions where quiz_id = $1 order by id;',[req.params.id])
-        quiz_questions = quiz_questions.rows
-        let options = [];
-        for (let i=0;i<quiz_questions.length;i++) {
-            let data = await db.query('select option_number,option_text from options where question_id=$1 order by option_number;',[quiz_questions[i].id]);
-            let temp = []
+    try {
+        let owner_data = await db.query('select user_id,status from quizzes where id = $1;',[req.params.id]);
+        let owner = owner_data.rows[0].user_id;
+        console.log(owner)
+        console.log(req.session.user)
+        if (req.session.user == owner) {
+            let quiz_questions = await db.query('select * from questions where quiz_id = $1 order by id;',[req.params.id])
+            quiz_questions = quiz_questions.rows
+            let options = [];
+            for (let i=0;i<quiz_questions.length;i++) {
+                let data = await db.query('select option_number,option_text from options where question_id=$1 order by option_number;',[quiz_questions[i].id]);
+                let temp = []
         // console.log(data.rows)
-            for (let j=0;j<data.rows.length;j++) {
-                temp.push(data.rows[j])
+                for (let j=0;j<data.rows.length;j++) {
+                    temp.push(data.rows[j])
+                }
+                options.push(temp);
             }
-            options.push(temp);
+        // console.log(options)
+            res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner,status: owner_data.rows[0].status});
+        } else {
+            res.send('Unauthorized')
         }
-    // console.log(options)
-        res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner,status: owner_data.rows[0].status});
-    } else {
-        res.send('Unauthorized')
+    } catch {
+        res.send('Invalid URL');
     }
 })
 
 app.get('/new-question/:id',async (req,res) => {
-    let owner_data_4 = await db.query('select user_id from quizzes where id = $1;',[req.params.id]);
-    let owner_4 = owner_data_4.rows[0].user_id;
-    if (req.session.user == owner_4) {
-        res.render('new_question.ejs',{quiz_id: req.params.id,owner:owner_4})
-    } else {
-        res.send('Unauthorized')
+    try {
+        let owner_data_4 = await db.query('select user_id from quizzes where id = $1;',[req.params.id]);
+        let owner_4 = owner_data_4.rows[0].user_id;
+        if (req.session.user == owner_4) {
+            res.render('new_question.ejs',{quiz_id: req.params.id,owner:owner_4})
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL')
     }
 })
 
@@ -165,30 +176,37 @@ app.post('/question_submit/:id',async (req,res) => {
 })
 
 app.get('/question/:id',async (req,res) => {
-    let quiz_id_data = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
-    let quiz_id = quiz_id_data.rows[0].quiz_id;
-    let owner_data_2 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
-    let owner_2 = owner_data_2.rows[0].user_id;
-    let question = await db.query('select question_text,marks,correct_option,input_type,correct_answer from questions where id=$1',[req.params.id])
-    let option_data = await db.query('select * from options where question_id=$1',[req.params.id])
-    // console.log(question.rows[0]);
-    if (req.session.user == owner_2) {
-        res.render('options.ejs',{question_data: question.rows[0],option_data:option_data.rows,question_id:req.params.id,quiz_id:quiz_id,owner:owner_2});
-    } else {
-        res.send('Unauthorized')
+    try {
+        let quiz_id_data = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
+        let quiz_id = quiz_id_data.rows[0].quiz_id;
+        let owner_data_2 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_2 = owner_data_2.rows[0].user_id;
+        let question = await db.query('select question_text,marks,correct_option,input_type,correct_answer from questions where id=$1',[req.params.id])
+        let option_data = await db.query('select * from options where question_id=$1',[req.params.id])
+        // console.log(question.rows[0]);
+        if (req.session.user == owner_2) {
+            res.render('options.ejs',{question_data: question.rows[0],option_data:option_data.rows,question_id:req.params.id,quiz_id:quiz_id,owner:owner_2});
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL')
     }
-    
 })
 
 app.get('/add_option/:id',async (req,res)=> {
-    let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
-    let quiz_id = quiz_id_data_2.rows[0].quiz_id;
-    let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
-    let owner_3 = owner_data_3.rows[0].user_id;
-    if (req.session.user == owner_3) {
-        res.render('add_option.ejs',{quest_id:req.params.id,quiz_id:quiz_id,owner:owner_3})
-    } else {
-        res.send('Unauthorized')
+    try {
+        let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.id])
+        let quiz_id = quiz_id_data_2.rows[0].quiz_id;
+        let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_3 = owner_data_3.rows[0].user_id;
+        if (req.session.user == owner_3) {
+            res.render('add_option.ejs',{quest_id:req.params.id,quiz_id:quiz_id,owner:owner_3})
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL')
     }
 })
 
@@ -253,60 +271,64 @@ app.get('/form/:id',async(req,res) => {
 })
 
 app.get('/form/:id/:stud_id',async (req,res) => {
-    console.log(req.params.stud_id)
-    console.log(req.session.user)
-    if (req.session.user == req.params.stud_id) {
-        let user_data = await db.query('select id from login_credentials;');
-    // console.log(user_data)
-        let users = [];
-        for (let i=0;i<user_data.rows.length;i++) {
-            users.push(user_data.rows[i].id);
-        }
-        if (membership(users,req.params.stud_id)) {
-            let quiz_data = await db.query('select * from quizzes where id=$1 and status = 0;',[req.params.id])
-            let submitted_data = await db.query('select user_id from responses where form_id = $1;',[req.params.id])
-            let submitted = null;
-            for (let i=0;i<submitted_data.rows.length;i++) {
-                if (submitted_data.rows[i].user_id == req.params.stud_id) {
-                    submitted = true;
-                }
+    try {
+        console.log(req.params.stud_id)
+        console.log(req.session.user)
+        if (req.session.user == req.params.stud_id) {
+            let user_data = await db.query('select id from login_credentials;');
+        // console.log(user_data)
+            let users = [];
+            for (let i=0;i<user_data.rows.length;i++) {
+                users.push(user_data.rows[i].id);
             }
-            if (submitted == null) {
-                submitted = false;
-            }
-        // console.log(submitted)
-            if (quiz_data.rows.length > 0) {
-                let quiz_name = quiz_data.rows[0].quiz_name;
-                let quiz_id = quiz_data.rows[0].id;
-                let questions_data = await db.query('select * from questions where quiz_id=$1 order by id;',[quiz_id]);
-                questions_data = questions_data.rows;
-                let questions = [];
-                let marks = [];
-                let options = [];
-                let ids = [];
-                let text_box = [];
-                for (let i=0;i<questions_data.length;i++) {
-                    questions.push(questions_data[i].question_text);
-                    marks.push(questions_data[i].marks);
-                    ids.push(questions_data[i].id)
-                    text_box.push(questions_data[i].input_type);
-                    let options_data = await db.query('select * from options where question_id=$1 order by option_number;',[questions_data[i].id]);
-                    options_data = options_data.rows;
-                    let temp = [];
-                    for (let j=0;j<options_data.length;j++) {
-                        temp.push(options_data[j].option_text);
+            if (membership(users,req.params.stud_id)) {
+                let quiz_data = await db.query('select * from quizzes where id=$1 and status = 0;',[req.params.id])
+                let submitted_data = await db.query('select user_id from responses where form_id = $1;',[req.params.id])
+                let submitted = null;
+                for (let i=0;i<submitted_data.rows.length;i++) {
+                    if (submitted_data.rows[i].user_id == req.params.stud_id) {
+                        submitted = true;
                     }
-                    options.push(temp);
                 }
-                res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids,text_box:text_box,submitted:submitted});
+                if (submitted == null) {
+                    submitted = false;
+                }
+                // console.log(submitted)
+                if (quiz_data.rows.length > 0) {
+                    let quiz_name = quiz_data.rows[0].quiz_name;
+                    let quiz_id = quiz_data.rows[0].id;
+                    let questions_data = await db.query('select * from questions where quiz_id=$1 order by id;',[quiz_id]);
+                    questions_data = questions_data.rows;
+                    let questions = [];
+                    let marks = [];
+                    let options = [];
+                    let ids = [];
+                    let text_box = [];
+                    for (let i=0;i<questions_data.length;i++) {
+                        questions.push(questions_data[i].question_text);
+                        marks.push(questions_data[i].marks);
+                        ids.push(questions_data[i].id)
+                        text_box.push(questions_data[i].input_type);
+                        let options_data = await db.query('select * from options where question_id=$1 order by option_number;',[questions_data[i].id]);
+                        options_data = options_data.rows;
+                        let temp = [];
+                        for (let j=0;j<options_data.length;j++) {
+                            temp.push(options_data[j].option_text);
+                        }
+                        options.push(temp);
+                    }
+                    res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids,text_box:text_box,submitted:submitted});
+                } else {
+                    res.send('Form doesn\'t exist');
+                }
             } else {
-                res.send('Form doesn\'t exist');
+                res.send('User not found.')
             }
         } else {
-            res.send('User not found.')
+            res.send('Unauthorized')
         }
-    } else {
-        res.send('Unauthorized')
+    } catch {
+        res.send('Invalid URL')
     }
 })
 
@@ -365,16 +387,20 @@ app.post('/form-submit/:form_id/:stud_id',async (req,res)=> {
 })
 
 app.get('/add-text-box/:quest_id',async (req,res) => {
-    let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.quest_id])
-    let quiz_id = quiz_id_data_2.rows[0].quiz_id;
-    let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
-    let owner_3 = owner_data_3.rows[0].user_id;
-    if (req.session.user == owner_3) {
-        await db.query('update questions set input_type=1 where id=$1;',[req.params.quest_id]);
-        await db.query('delete from options where question_id=$1;',[req.params.quest_id]);
-        res.redirect('/question/'+req.params.quest_id)
-    } else {
-        res.send('Unauthorized')
+    try {
+        let quiz_id_data_2 = await db.query('select quiz_id from questions where id=$1;',[req.params.quest_id])
+        let quiz_id = quiz_id_data_2.rows[0].quiz_id;
+        let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_3 = owner_data_3.rows[0].user_id;
+        if (req.session.user == owner_3) {
+            await db.query('update questions set input_type=1 where id=$1;',[req.params.quest_id]);
+            await db.query('delete from options where question_id=$1;',[req.params.quest_id]);
+            res.redirect('/question/'+req.params.quest_id)
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL')
     }
 })
 
@@ -416,19 +442,23 @@ app.post('/form-register/:form_id',async (req,res) => {
 })
 
 app.get('/status-update/:quiz_id',async (req,res) => {
-    let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[req.params.quiz_id]);
-    let owner_3 = owner_data_3.rows[0].user_id;
-    if (req.session.user == owner_3) {
-        let quiz_data_3 = await db.query('select status from quizzes where id=$1;',[req.params.quiz_id]);
-        if (quiz_data_3.rows[0].status == 1) {
-            await db.query('update quizzes set status=0 where id =$1;',[req.params.quiz_id])
+    try {
+        let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[req.params.quiz_id]);
+        let owner_3 = owner_data_3.rows[0].user_id;
+        if (req.session.user == owner_3) {
+            let quiz_data_3 = await db.query('select status from quizzes where id=$1;',[req.params.quiz_id]);
+            if (quiz_data_3.rows[0].status == 1) {
+                await db.query('update quizzes set status=0 where id =$1;',[req.params.quiz_id])
+            }
+            else {
+                await db.query('update quizzes set status=1 where id =$1;',[req.params.quiz_id])
+            }
+            res.redirect('/quiz/'+req.params.quiz_id)
+        } else {
+            res.send('Unauthorized')
         }
-        else {
-            await db.query('update quizzes set status=1 where id =$1;',[req.params.quiz_id])
-        }
-        res.redirect('/quiz/'+req.params.quiz_id)
-    } else {
-        res.send('Unauthorized')
+    } catch {
+        res.send('Invalid URL');
     }
 }) 
 
