@@ -141,16 +141,19 @@ app.get('/quiz/:id',async (req,res) => {
                 let response = responses_data.rows[i]
                 if (membership(user_id,response.user_id)) {
                     for (let j=0;j<responses.length;j++) {
-                        if (responses[j]['user_id'] == response.user_id) {
-                            responses[j]['user_id']['questions'].push(response.question_id)
-                            if (response.option_answer == null) {
-                                responses[j]['user_id']['answer'].push(response.text_answer);
-                            } else {
-                                responses[j]['user_id']['answer'].push(response.option_answer);
+                        for (let k in responses[j]) {
+                            if (k == response.user_id) {
+                                responses[j][k]['questions'].push(response.question_id)
+                                if (response.option_answer == null) {
+                                    responses[j][k]['answer'].push(response.text_answer);
+                                } else {
+                                    responses[j][k]['answer'].push(response.option_answer);
+                                }
+                                // user_id.push(response.user_id)
+                                // break; 
                             }
-                            // user_id.push(response.user_id)
-                            break;    
                         }
+                        // break;
                     }
                 } else {
                     let object_temp = {}
@@ -168,6 +171,9 @@ app.get('/quiz/:id',async (req,res) => {
                 }
             }
             // console.log(responses)
+            for (let j=0;j<responses.length;j++) {
+                console.log(responses[j])
+            }
             let quiz_questions = await db.query('select * from questions where quiz_id = $1 order by id;',[req.params.id])
             quiz_questions = quiz_questions.rows
             let options = [];
