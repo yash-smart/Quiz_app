@@ -18,6 +18,7 @@ app.use(session({
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
+  rolling: true,
   cookie: { 
     secure: false, 
     maxAge: 3600000
@@ -128,7 +129,7 @@ app.post('/add_quiz/:id',async (req,res) => {
 })
 
 app.get('/quiz/:id',async (req,res) => {
-    // try {
+    try {
         let owner_data = await db.query('select user_id,status from quizzes where id = $1;',[req.params.id]);
         let owner = owner_data.rows[0].user_id;
         console.log(owner)
@@ -165,7 +166,7 @@ app.get('/quiz/:id',async (req,res) => {
                         object_temp2['answer'] = [response.option_answer]
                     }
                     object_temp[response.user_id] = object_temp2
-                    console.log(object_temp)
+                    // console.log(object_temp)
                     responses.push(object_temp)
                     user_id.push(response.user_id)
                 }
@@ -191,9 +192,9 @@ app.get('/quiz/:id',async (req,res) => {
         } else {
             res.send('Unauthorized')
         }
-    // } catch {
-        // res.send('Invalid URL');
-    // }
+    } catch {
+        res.send('Invalid URL');
+    }
 })
 
 app.get('/new-question/:id',async (req,res) => {
