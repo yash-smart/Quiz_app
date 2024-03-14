@@ -18,7 +18,10 @@ app.use(session({
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // Set secure to true in production with HTTPS
+  cookie: { 
+    secure: false, 
+    maxAge: 3600000
+} // Set secure to true in production with HTTPS
 }));
 
 const db = new pg.Client({
@@ -125,12 +128,46 @@ app.post('/add_quiz/:id',async (req,res) => {
 })
 
 app.get('/quiz/:id',async (req,res) => {
-    try {
+    // try {
         let owner_data = await db.query('select user_id,status from quizzes where id = $1;',[req.params.id]);
         let owner = owner_data.rows[0].user_id;
         console.log(owner)
         console.log(req.session.user)
         if (req.session.user == owner) {
+            let responses_data = await db.query('select * from responses where form_id = $1 order by user_id;',[req.params.id]);
+            let responses = [];
+            let user_id = [];
+            for (let i=0;i<responses_data.rows.length;i++) {
+                let response = responses_data.rows[i]
+                if (membership(user_id,response.user_id)) {
+                    for (let j=0;j<responses.length;j++) {
+                        if (responses[j]['user_id'] == response.user_id) {
+                            responses[j]['user_id']['questions'].push(response.question_id)
+                            if (response.option_answer == null) {
+                                responses[j]['user_id']['answer'].push(response.text_answer);
+                            } else {
+                                responses[j]['user_id']['answer'].push(response.option_answer);
+                            }
+                            // user_id.push(response.user_id)
+                            break;    
+                        }
+                    }
+                } else {
+                    let object_temp = {}
+                    let object_temp2 = {}
+                    object_temp2['questions'] = [response.question_id]
+                    if (response.option_answer == null) {
+                        object_temp2['answer'] = [response.text_answer]
+                    } else {
+                        object_temp2['answer'] = [response.option_answer]
+                    }
+                    object_temp[response.user_id] = object_temp2
+                    console.log(object_temp)
+                    responses.push(object_temp)
+                    user_id.push(response.user_id)
+                }
+            }
+            // console.log(responses)
             let quiz_questions = await db.query('select * from questions where quiz_id = $1 order by id;',[req.params.id])
             quiz_questions = quiz_questions.rows
             let options = [];
@@ -144,13 +181,13 @@ app.get('/quiz/:id',async (req,res) => {
                 options.push(temp);
             }
         // console.log(options)
-            res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner,status: owner_data.rows[0].status});
+            res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner,status: owner_data.rows[0].status,responses:responses_data.rows});
         } else {
             res.send('Unauthorized')
         }
-    } catch {
-        res.send('Invalid URL');
-    }
+    // } catch {
+        // res.send('Invalid URL');
+    // }
 })
 
 app.get('/new-question/:id',async (req,res) => {
