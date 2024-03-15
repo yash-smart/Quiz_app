@@ -131,6 +131,8 @@ app.post('/add_quiz/:id',async (req,res) => {
 app.get('/quiz/:id',async (req,res) => {
     try {
         let owner_data = await db.query('select user_id,status from quizzes where id = $1;',[req.params.id]);
+        let login_details = await db.query('select * from login_credentials;');
+        login_details = login_details.rows;
         let owner = owner_data.rows[0].user_id;
         console.log(owner)
         console.log(req.session.user)
@@ -188,7 +190,7 @@ app.get('/quiz/:id',async (req,res) => {
                 options.push(temp);
             }
         // console.log(options)
-            res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner,status: owner_data.rows[0].status,responses:responses_data.rows});
+            res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner,status: owner_data.rows[0].status,responses:responses,login_details:login_details});
         } else {
             res.send('Unauthorized')
         }
