@@ -57,7 +57,26 @@
                 <% if(questions[k] == question_data[j].id) {%>
                     <p><% flag = true; %></p>
                     <p><%= question_data[j].question_text %></p>
-                    <p><%= answers[k] %></p>
+                    <% console.log(question_data[j].input_type) %>
+                    <% if (question_data[j].input_type == null) { %>
+                        <% for (let a=0;a<options[j].length;a++) { %>
+                            <% if (options[j][a].option_number == question_data[j].correct_option) {%>
+                                <% if (options[j][a].option_number == answers[k]) { %>
+                                    <p style="color: green;"><%= options[j][a].option_number %>: <%= options[j][a].option_text %></p>
+                                <% } else { %>
+                                    <p style="color: red;"><%= options[j][a].option_number %>: <%= options[j][a].option_text %></p>
+                                <% } %>
+                            <% } else {%>
+                                <% if (options[j][a].option_number == answers[k]) { %>
+                                    <p style="color: blue;"><%= options[j][a].option_number %>: <%= options[j][a].option_text %></p>
+                                <% } else { %>
+                                    <p><%= options[j][a].option_number %>: <%= options[j][a].option_text %></p>
+                                <% } %>
+                            <% } %>
+                        <% } %>
+                    <% } else { %>
+                        <p><%= answers[k] %></p>
+                    <% } %>
                 <% } %>
             <% } %>
             <% if (flag == false) { %>
