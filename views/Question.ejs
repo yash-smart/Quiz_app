@@ -51,8 +51,10 @@
             <% } %>
         <% } %>
         <h3>Username: <%= user %></h3>
+        <form>
         <% for (let j=0;j<question_data.length;j++) { %>
             <% let flag = false; %>
+            <% let flag2 = false; %>
             <% for (let k=0;k<questions.length;k++) { %>
                 <% if(questions[k] == question_data[j].id) {%>
                     <p><% flag = true; %></p>
@@ -62,20 +64,26 @@
                         <% for (let a=0;a<options[j].length;a++) { %>
                             <% if (options[j][a].option_number == question_data[j].correct_option) {%>
                                 <% if (options[j][a].option_number == answers[k]) { %>
-                                    <p style="color: green;"><%= options[j][a].option_number %>: <%= options[j][a].option_text %></p>
+                                    <p style="color: green;"><%= options[j][a].option_number %>: <%= options[j][a].option_text %> (Selected option/correct answer)</p>
+                                    <%= flag2 = true; %>
                                 <% } else { %>
-                                    <p style="color: red;"><%= options[j][a].option_number %>: <%= options[j][a].option_text %></p>
+                                    <p style="color: red;"><%= options[j][a].option_number %>: <%= options[j][a].option_text %> (correct answer)</p>
                                 <% } %>
                             <% } else {%>
                                 <% if (options[j][a].option_number == answers[k]) { %>
-                                    <p style="color: blue;"><%= options[j][a].option_number %>: <%= options[j][a].option_text %></p>
+                                    <p style="color: blue;"><%= options[j][a].option_number %>: <%= options[j][a].option_text %> (selected answer)</p>
                                 <% } else { %>
                                     <p><%= options[j][a].option_number %>: <%= options[j][a].option_text %></p>
                                 <% } %>
                             <% } %>
                         <% } %>
                     <% } else { %>
-                        <p><%= answers[k] %></p>
+                        <p style="color: red;"><%= question_data[j].correct_answer %></p>
+                        <p style="color: blue;"><%= answers[k] %></p>
+                        <% if (question_data[j].correct_answer.toLowerCase() == answers[k].toLowerCase()) { %>
+                            <% console.log(true); %>
+                            <% flag2 = true; %>
+                        <% } %>
                     <% } %>
                 <% } %>
             <% } %>
@@ -83,7 +91,14 @@
                 <p><%= question_data[j].question_text %></p>
                 <p>No response</p>
             <% } %>
+            <label for="marks" >Awarded marks</label>
+            <% if (flag2 == false) { %>
+                <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>" value="0">
+            <% } else {%>
+                <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>" value="<%= question_data[j].marks %>">
+            <% } %>
         <% } %>
+        </form>
     <% } %>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>

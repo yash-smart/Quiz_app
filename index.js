@@ -403,8 +403,8 @@ app.post('/form-login/:form_id',async (req,res) => {
         let user_id = data_obj.rows[0].id;
         // console.log(user_id)
         if (data === Password) {
-            res.redirect('/form/'+req.params.form_id+'/'+user_id)
             req.session.user = user_id;
+            res.redirect('/form/'+req.params.form_id+'/'+user_id)
         }
         else {
             res.redirect('/form/'+req.params.form_id)
