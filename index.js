@@ -529,7 +529,23 @@ app.get('/status-update/:quiz_id',async (req,res) => {
     } catch {
         res.send('Invalid URL');
     }
-}) 
+});
+
+app.post('/marks-submit/:id',async (req,res) => {
+    try {
+        let owner_data = await db.query('select user_id,status from quizzes where id = $1;',[req.params.id]);
+        // console.log(owner_data.rows[0].user_id)
+        // console.log()
+        if (owner_data.rows[0].user_id == req.session.user) {
+            console.log(req.body)
+            res.redirect('/quiz/'+req.params.id)
+        } else {
+            res.send('Unauthorised')
+        }
+    } catch {
+        res.send('Invalid URL')
+    }
+})
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

@@ -35,6 +35,7 @@
         <a href="/status-update/<%= quiz_id %>">Stop taking responses</a>
     <% } %>
     <h2>Responses</h2>
+    <form action="/marks-submit/<%= quiz_id %>" method="post">
     <% for (let i=0;i<responses.length;i++) { %>
         <% let user_id = null; %>
         <% let questions = []; %>
@@ -51,7 +52,7 @@
             <% } %>
         <% } %>
         <h3>Username: <%= user %></h3>
-        <form>
+        
         <% for (let j=0;j<question_data.length;j++) { %>
             <% let flag = false; %>
             <% let flag2 = false; %>
@@ -93,13 +94,14 @@
             <% } %>
             <label for="marks" >Awarded marks</label>
             <% if (flag2 == false) { %>
-                <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>" value="0">
+                <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>:<%= user_id %>" value="0">
             <% } else {%>
-                <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>" value="<%= question_data[j].marks %>">
+                <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>:<%= user_id %>" value="<%= question_data[j].marks %>">
             <% } %>
         <% } %>
-        </form>
     <% } %>
+    <input type="submit" value="Post marks">
+    </form>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
