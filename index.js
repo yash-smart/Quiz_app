@@ -43,6 +43,24 @@ function membership(array,element) {
     return (false);
 }
 
+async function check_membership (quest_id,user_id) {
+    try {
+        
+        let data = await db.query('select * from marks where quest_id = $1 and user_id=$2;',[quest_id,user_id]);
+        // console.log(data)
+        if (quest_id == '1' && user_id == '1') {
+            console.log(data.rows)   
+        }
+        if (data.rows.length == 0) {
+            return false;
+        } else {
+            return data.rows[0].awarded_marks;
+        }
+    } catch {
+        return false;
+    }
+}
+
 app.get("/",(req,res) => {
     res.render("index.ejs")
 })
@@ -538,6 +556,26 @@ app.post('/marks-submit/:id',async (req,res) => {
         // console.log()
         if (owner_data.rows[0].user_id == req.session.user) {
             console.log(req.body)
+            for (let i in req.body) {
+                // console.log(await check_membership(i.split(':')[0],i.split(':')[1]))
+                if (await check_membership(i.split(':')[0],i.split(':')[1]) === false) {
+                    try {
+                        await db.query('insert into marks values ($1,$2,$3);',[i.split(':')[0],i.split(':')[1],req.body[i]]);
+                        console.log([i.split(':')[0],i.split(':')[1]])
+                        console.log('Not found')
+                    } catch(err) {
+                        console.log(err)
+                    }
+                } else {
+                    try {
+                        await db.query('update marks set awarded_marks=$1 where quest_id=$2 and user_id=$3;',[req.body[i],i.split(':')[0],i.split(':')[1]]);
+                        console.log([req.body[i],i.split(':')[0],i.split(':')[1]])
+                        console.log('else')
+                    } catch(err) {
+                        console.log(err)
+                    }
+                }
+            }
             res.redirect('/quiz/'+req.params.id)
         } else {
             res.send('Unauthorised')
