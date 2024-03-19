@@ -246,12 +246,17 @@ app.post('/question_submit/:id',async (req,res) => {
         let owner_data_4 = await db.query('select user_id from quizzes where id = $1;',[req.params.id]);
         let owner_4 = owner_data_4.rows[0].user_id;
         if (req.session.user == owner_4) {
-            await db.query('insert into questions(quiz_id,question_text,marks) values($1,$2,$3);',[req.params.id,req.body.question_text,req.body.marks]);
-            res.redirect('/quiz/'+req.params.id);
+            try {
+                await db.query('insert into questions(quiz_id,question_text,marks,min_marks) values($1,$2,$3,$4);',[req.params.id,req.body.question_text,req.body.marks,req.body.min_marks]);
+                res.redirect('/quiz/'+req.params.id);
+            } catch(err) {
+                console.log(err)
+                res.send('Invalid entry in fields');
+            }
         } else {
             res.send('Unauthorized')
         }
-    } catch {
+    } catch(err) {
         res.send('Invalid URL')
     }
 })
