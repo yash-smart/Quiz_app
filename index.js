@@ -61,6 +61,15 @@ async function check_membership (quest_id,user_id) {
     }
 }
 
+async function generate_marks(quiz_id) {
+    let data = await db.query('select * from marks where quest_id in (select id from questions where quiz_id = $1);',[quiz_id]);
+    let obj = {}
+    for (let i=0;i<data.rows.length;i++) {
+        obj[data.rows[i].quest_id + ':' + data.rows[i].user_id] = data.rows[i].awarded_marks;
+    }
+    return obj;
+}
+
 app.get("/",(req,res) => {
     res.render("index.ejs")
 })
@@ -207,8 +216,9 @@ app.get('/quiz/:id',async (req,res) => {
                 }
                 options.push(temp);
             }
-        // console.log(options)
-            res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner,status: owner_data.rows[0].status,responses:responses,login_details:login_details});
+            // console.log(options)
+            let marks_data = await generate_marks(req.params.id)
+            res.render('Question.ejs',{question_data: quiz_questions,quiz_id: req.params.id,options: options,owner:owner,status: owner_data.rows[0].status,responses:responses,login_details:login_details,marks_data:marks_data});
         } else {
             res.send('Unauthorized')
         }
@@ -398,7 +408,11 @@ app.get('/form/:id/:stud_id',async (req,res) => {
                     }
                     res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids,text_box:text_box,submitted:submitted});
                 } else {
-                    res.send('Form doesn\'t exist');
+                    if (submitted == true) {
+                        res.render('form.ejs',{submitted: true})
+                    } else {
+                        res.send('Form doesn\'t exist');
+                    }
                 }
             } else {
                 res.send('User not found.')

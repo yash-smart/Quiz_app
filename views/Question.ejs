@@ -93,10 +93,14 @@
                 <p>No response</p>
             <% } %>
             <label for="marks" >Awarded marks</label>
-            <% if (flag2 == false) { %>
-                <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>:<%= user_id %>" value="0">
+            <% if (marks_data[question_data[j].id+':'+user_id] != undefined) { %>
+                <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>:<%= user_id %>" value="<%= marks_data[question_data[j].id+':'+user_id] %>">
             <% } else {%>
-                <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>:<%= user_id %>" value="<%= question_data[j].marks %>">
+                <% if (flag2 == false) { %>
+                    <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>:<%= user_id %>" value="0">
+                <% } else {%>
+                    <input type="number"  max="<%= question_data[j].marks %>" name="<%= question_data[j].id %>:<%= user_id %>" value="<%= question_data[j].marks %>">
+                <% } %>
             <% } %>
         <% } %>
     <% } %>
