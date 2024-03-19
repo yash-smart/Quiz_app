@@ -604,6 +604,61 @@ app.post('/marks-submit/:id',async (req,res) => {
     }
 })
 
+app.post('/delete_question/:quest_id',async (req,res) => {
+    try {
+        let quiz_id_data = await db.query('select quiz_id from questions where id=$1;',[req.params.quest_id])
+        let quiz_id = quiz_id_data.rows[0].quiz_id;
+        let owner_data_2 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_2 = owner_data_2.rows[0].user_id;
+        if (req.session.user == owner_2) {
+            await db.query('delete from options where question_id=$1;',[req.params.quest_id]);
+            await db.query('delete from responses where question_id=$1;',[req.params.quest_id]);
+            await db.query('delete from marks where quest_id=$1;',[req.params.quest_id]);
+            await db.query('delete from questions where id=$1',[req.params.quest_id]);
+            res.redirect('/quiz/'+quiz_id)
+        } else {
+            res.send('Unauthorised')
+        }
+    } catch(err) {
+        console.log(err)
+        res.send('Invalid URL')
+    }
+})
+
+app.get('/update/:quest_id',async (req,res) => {
+    try {
+        // let question_data = await db.query('select * from questions ')
+        let quiz_id_data = await db.query('select * from questions where id=$1;',[req.params.quest_id])
+        let quiz_id = quiz_id_data.rows[0].quiz_id;
+        let owner_data_2 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_2 = owner_data_2.rows[0].user_id;
+        if (req.session.user == owner_2) {
+            res.render('new_question.ejs',{quest_id:req.params.quest_id,owner:owner_2,update:true,quiz_id:quiz_id,question_data:quiz_id_data.rows[0]})
+        } else {
+            res.send('Unauthorised')
+        }
+    }catch {
+        res.send('Invalid URL.')
+    }
+    
+})
+
+app.post('/update_quest/:quest_id',async (req,res) => {
+    try {
+        let quiz_id_data = await db.query('select quiz_id from questions where id=$1;',[req.params.quest_id])
+        let quiz_id = quiz_id_data.rows[0].quiz_id;
+        let owner_data_2 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_2 = owner_data_2.rows[0].user_id;
+        if (req.session.user == owner_2) {
+            await db.query('update questions set question_text=$1,marks=$2,min_marks=$3 where id=$4;',[req.body.question_text,req.body.marks,req.body.min_marks,req.params.quest_id]);
+            res.redirect('/question/'+req.params.quest_id)
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL')
+    }  
+})
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
