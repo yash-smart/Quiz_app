@@ -366,6 +366,12 @@ app.get('/form/:id',async(req,res) => {
 
 app.get('/form/:id/:stud_id',async (req,res) => {
     try {
+        let questions_2 = [];
+        let options_2 = [];
+        let answers_2 = [];
+        let responses_2 = [];
+        let marks = [];
+        let flag_marks = false;
         console.log(req.params.stud_id)
         console.log(req.session.user)
         if (req.session.user == req.params.stud_id) {
@@ -388,6 +394,41 @@ app.get('/form/:id/:stud_id',async (req,res) => {
                     submitted = false;
                 }
                 // console.log(submitted)
+                if (submitted == true) {
+                    let question_data = await db.query('select * from questions where quiz_id=$1 order by id;',[req.params.id]);
+                    question_data = question_data.rows;
+                    for (let i=0;i<question_data.length;i++) {
+                        questions_2.push(question_data[i].question_text)
+                        if(question_data[i].input_type == 1) {
+                            answers_2.push(question_data[i].correct_answer);
+                        } else {
+                            answers_2.push(question_data[i].correct_option);
+                        }
+                        let option_data = await db.query('select * from options where question_id=$1 order by option_number;',[question_data[i].id])
+                        let temp = [];
+                        for (let j=0;j<option_data.rows.length;j++) {
+                            temp.push(option_data.rows[j].option_text);
+                        }
+                        options_2.push(temp);
+                        let response_data = await db.query('select * from responses where question_id=$1 and user_id=$2;',[question_data[i].id,req.params.stud_id]);
+                        let marks_data = await db.query('select * from marks where quest_id = $1 and user_id=$2;',[question_data[i].id,req.params.stud_id]);
+                        if (marks_data.rows.length>0) {
+                            flag_marks = true;
+                            marks.push(marks_data.rows[0].awarded_marks);
+                        } else {
+                            marks.push(null)
+                        }
+                        if (response_data.rows.length>0) {
+                            if (question_data[i].input_type == 1) {
+                                responses_2.push(response_data.rows[0].text_answer);
+                            } else {
+                                responses_2.push(response_data.rows[0].option_answer);
+                            }
+                        } else {
+                            responses_2.push(null);
+                        }
+                    }
+                }
                 if (quiz_data.rows.length > 0) {
                     let quiz_name = quiz_data.rows[0].quiz_name;
                     let quiz_id = quiz_data.rows[0].id;
@@ -411,10 +452,14 @@ app.get('/form/:id/:stud_id',async (req,res) => {
                         }
                         options.push(temp);
                     }
-                    res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids,text_box:text_box,submitted:submitted});
+                    if (submitted == true) {
+                        res.render('form.ejs',{submitted:true,questions:questions_2,options:options_2,answers:answers_2,responses:responses_2,marks:marks,flag_marks:flag_marks});
+                    } else {
+                        res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids,text_box:text_box,submitted:false});
+                    }
                 } else {
                     if (submitted == true) {
-                        res.render('form.ejs',{submitted: true})
+                        res.render('form.ejs',{submitted:true,questions:questions_2,options:options_2,answers:answers_2,responses:responses_2,marks:marks,flag_marks:flag_marks});
                     } else {
                         res.send('Form doesn\'t exist');
                     }

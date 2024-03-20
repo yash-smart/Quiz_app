@@ -21,9 +21,44 @@
                 <% } %>
             <% } %>
             <input type="submit" value="Submit">
-    </form>
+        </form>
     <% } else { %>
         <h1>Already submitted</h1>
+        <% if (flag_marks == false) { %>
+            <p>Responses not posted yet.</p>
+        <% } else { %>
+            <% let sum = 0; %>
+            <% for (let i=0;i<questions.length;i++) { %>
+                <p>Question: <%= i+1 %>: <%= questions[i] %></p>
+                <% if (options[i].length > 0) { %>
+                    <% for (let j=0;j<options[i].length;j++) { %>
+                        <% if (j+1 == answers[i]) {%>
+                            <% if (j+1 == responses[i]) { %>
+                                <p style="color: green;"><%= options[i][j] %>- (Answer/Selected)</p>
+                            <% } else { %>
+                                <p style="color: red;"><%= options[i][j] %>- (Answer)</p>
+                            <% } %>
+                        <% } else {%>
+                            <% if (j+1 == responses[i]) { %>
+                                <p style="color: blue;"><%= options[i][j] %>- (Selected)</p>
+                            <% } else {%>
+                                <p><%= options[i][j] %></p>
+                            <% } %>
+                        <% } %>
+                    <% } %>
+                <% } else {%>
+                    <% if (answers[i].toLowerCase() == responses[i].toLowerCase()) { %>
+                        <p style="color: green;"><%= answers[i] %> - Answer/Your Answer</p>
+                    <% } else {%>
+                        <p style="color: red;"><%= answers[i] %>- Answer</p>
+                        <p style="color: blue;"><%= responses[i] %></p>
+                    <% } %>
+                <% } %>
+                <p style="color: blueviolet;">Marks Awarded- <%= marks[i] %></p>
+                <% sum = sum + marks[i] %>
+            <% } %>
+            <p style="color: blueviolet;">Total Marks: <%= sum %></p>
+        <% } %>
     <% } %>
 </body>
 </html>
