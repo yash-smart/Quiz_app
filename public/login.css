@@ -1,0 +1,44 @@
+body {
+    background-color: black;
+}
+h1 {
+    color: aquamarine;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+label {
+    color: blue;
+    font-weight: bold;
+    width: 100px;
+    display: inline-block;
+}
+.input_field {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: aquamarine;
+    border-radius: 10px;
+}
+.container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.login {
+    width: fit-content;
+    padding: 10px;
+    background-color: chocolate;
+    border-radius: 10px;
+}
+input[type='submit'] {
+    background-color: bisque;
+    padding: 10px;
+    border-radius: 10px;
+}
+.not_registered {
+    color: aqua;
+}
+a,u {
+    text-decoration: underline !important;
+    color: aqua;
+}
