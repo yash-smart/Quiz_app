@@ -4,24 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <link href="/login.css" rel="stylesheet">
 </head>
 <body>
     <h1>Register</h1>
     <% if (locals.form) { %>
         <form action="/form-register/<%= form_id %>" method="POST">
-            <p>Username</p>
-            <input type="text" name="username" placeholder="Username">
-            <p>Password</p>
-            <input type="password" name="password" placeholder="Password">
-            <input type="submit" value="Submit">
+            <div class="container">
+                <div class="login">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" placeholder="Username" class="input_field"><br>
+                    <label for="password">Password</label>
+                    <input type="password" name="password" placeholder="Password" class="input_field"><br>
+                    <input type="submit" value="Submit">
+                </div>
+            </div>
         </form>
     <% } else {%>
         <form action="/register" method="POST">
-            <p>Username</p>
-            <input type="text" name="username" placeholder="Username">
-            <p>Password</p>
-            <input type="password" name="password" placeholder="Password">
-            <input type="submit" value="Submit">
+            <div class="container">
+                <div class="login">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" placeholder="Username" class="input_field"><br>
+                    <label for="password">Password</label>
+                    <input type="password" name="password" placeholder="Password" class="input_field"><br>
+                    <input type="submit" value="Submit">
+                </div>
+            </div>
         </form>
     <% } %>
 </body>
