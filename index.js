@@ -370,7 +370,7 @@ app.get('/form/:id/:stud_id',async (req,res) => {
         let options_2 = [];
         let answers_2 = [];
         let responses_2 = [];
-        let marks = [];
+        let marks_2 = [];
         let flag_marks = false;
         console.log(req.params.stud_id)
         console.log(req.session.user)
@@ -414,9 +414,9 @@ app.get('/form/:id/:stud_id',async (req,res) => {
                         let marks_data = await db.query('select * from marks where quest_id = $1 and user_id=$2;',[question_data[i].id,req.params.stud_id]);
                         if (marks_data.rows.length>0) {
                             flag_marks = true;
-                            marks.push(marks_data.rows[0].awarded_marks);
+                            marks_2.push(marks_data.rows[0].awarded_marks);
                         } else {
-                            marks.push(null)
+                            marks_2.push(null)
                         }
                         if (response_data.rows.length>0) {
                             if (question_data[i].input_type == 1) {
@@ -453,13 +453,13 @@ app.get('/form/:id/:stud_id',async (req,res) => {
                         options.push(temp);
                     }
                     if (submitted == true) {
-                        res.render('form.ejs',{submitted:true,questions:questions_2,options:options_2,answers:answers_2,responses:responses_2,marks:marks,flag_marks:flag_marks});
+                        res.render('form.ejs',{submitted:true,questions:questions_2,options:options_2,answers:answers_2,responses:responses_2,marks_2:marks_2,flag_marks:flag_marks});
                     } else {
                         res.render('form.ejs',{quiz_name:quiz_name,questions:questions,marks:marks,options:options,stud_id:req.params.stud_id,form_id:req.params.id,question_ids:ids,text_box:text_box,submitted:false});
                     }
                 } else {
                     if (submitted == true) {
-                        res.render('form.ejs',{submitted:true,questions:questions_2,options:options_2,answers:answers_2,responses:responses_2,marks:marks,flag_marks:flag_marks});
+                        res.render('form.ejs',{submitted:true,questions:questions_2,options:options_2,answers:answers_2,responses:responses_2,marks_2:marks_2,flag_marks:flag_marks});
                     } else {
                         res.send('Form doesn\'t exist');
                     }
