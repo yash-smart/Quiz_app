@@ -33,6 +33,7 @@
     <% } else {%>
         <p>Correct answer set :</p>
         <p><%= question_data.correct_answer %></p>
+        <a href="/remove-text-box/<%= question_id %>">Remove text box</a>
         <form action="/correct-answer/<%= question_id %>" method="POST">
             <textarea name="correct_answer" rows="4" cols="50"></textarea>
             <input type="submit" value="Set correct answer">

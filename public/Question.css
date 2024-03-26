@@ -1,0 +1,39 @@
+body {
+    background-color: black;
+    padding: 10px;
+}
+.question {
+    background-color: aquamarine;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+}
+.question_link {
+    text-decoration: none;
+}
+.no_question {
+    color: aqua;
+}
+.add_question {
+    color: aqua;
+}
+.responses {
+    color: aqua;
+}
+h2 {
+    color: aqua;
+}
+h3 {
+    color: bisque;
+}
+.response {
+    background-color: skyblue;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+}
+input[type='submit'] {
+    background-color: chocolate;
+    padding: 10px;
+    border-radius: 10px;
+}

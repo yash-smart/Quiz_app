@@ -704,6 +704,22 @@ app.post('/update_quest/:quest_id',async (req,res) => {
         res.send('Invalid URL')
     }  
 })
+app.get('/remove-text-box/:quest_id', async (req,res) => {
+    try {
+        let quiz_id_data = await db.query('select quiz_id from questions where id=$1;',[req.params.quest_id])
+        let quiz_id = quiz_id_data.rows[0].quiz_id;
+        let owner_data_2 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
+        let owner_2 = owner_data_2.rows[0].user_id;
+        if (req.session.user == owner_2) {
+            await db.query('update questions set input_type=null,correct_answer=null where id=$1;',[req.params.quest_id]);
+            res.redirect('/question/'+req.params.quest_id);
+        } else {
+            res.send('Unauthorized')
+        }
+    } catch {
+        res.send('Invalid URL.')
+    }
+})
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
