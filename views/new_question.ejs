@@ -11,9 +11,15 @@
         <li class="nav-item">
           <a class="nav-link" aria-current="page" href="/main/<%= owner %>">Home</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/quiz/<%= quiz_id %>">Back</a>
-        </li>
+        <% if (locals.update) { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/question/<%= quest_id %>">Back</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/quiz/<%= quiz_id %>">Back</a>
+          </li>
+        <% } %>
     </ul>
     <% if (locals.update) { %>
       <form action="/update_quest/<%= quest_id %>" method="POST">

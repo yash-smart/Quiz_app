@@ -540,7 +540,7 @@ app.get('/add-text-box/:quest_id',async (req,res) => {
         let owner_data_3 = await db.query('select user_id from quizzes where id = $1;',[quiz_id]);
         let owner_3 = owner_data_3.rows[0].user_id;
         if (req.session.user == owner_3) {
-            await db.query('update questions set input_type=1 where id=$1;',[req.params.quest_id]);
+            await db.query('update questions set input_type=1,correct_option=null where id=$1;',[req.params.quest_id]);
             await db.query('delete from options where question_id=$1;',[req.params.quest_id]);
             res.redirect('/question/'+req.params.quest_id)
         } else {
