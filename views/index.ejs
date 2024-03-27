@@ -40,5 +40,8 @@
     <% if (locals.users_exist == true) { %>
         <p style="color: red;">Username already exist.</p>
     <% } %>
+    <% if (locals.message) { %>
+        <p style="color: red;font-weight: bold;"><%= message %></p>
+    <% } %>
 </body>
 </html>

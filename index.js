@@ -92,11 +92,11 @@ app.post('/ini',async (req,res) => {
             res.redirect('/main/'+user_id)
         }
         else {
-            res.redirect('/')
+            res.render('index.ejs',{message: 'Incorrect Password'})
         }
     }
     else {
-        res.redirect('/')
+        res.render('index.ejs',{message: 'Invalid Username'})
     }
     
 })
